@@ -1,0 +1,8 @@
+{
+  "name": "grow-samples-deployment",
+  "private": true,
+  "dependencies": {
+    "airkit": "github:grow/airkit"
+  }
+}
+

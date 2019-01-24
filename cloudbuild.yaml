@@ -2,7 +2,7 @@ timeout: 1200s  # 20m.
 
 substitutions:
   _AUTH_KEY: ~  # base64-encoded Google OAuth client secret. If present, decoded to `auth-key-file.json`.
-  _CACHE_DIRS: node_modules extensions
+  _CACHE_FILES: node_modules extensions
   _CACHE_KEY: package.json extensions.txt
   _PROJECT_NAME: ~  # Optional, when one GCP project hosts multiple builds.
   _WEBREVIEW_API_KEY: ~  # If present, API key authentication is used instead of a service account.
@@ -59,7 +59,7 @@ steps:
   entrypoint: bash
   args:
   - '-c'
-  - tar -czf cache.tgz $(ls ${_CACHE_DIRS} 2> /dev/null )  # Ignore missing directories.
+  - tar -czf cache.tgz $(ls ${_CACHE_FILES} 2> /dev/null )  # Ignore missing directories.
 
 - name: gcr.io/cloud-builders/gsutil
   id: upload cache

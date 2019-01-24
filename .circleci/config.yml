@@ -1,0 +1,81 @@
+version: 2
+
+cache_restore: &cache_restore
+  keys:
+    - &cache_key grow-cache-{{ .Branch }}-{{ checksum "package.json" }}-{{ checksum "node_version.txt" }}-{{ checksum ".circleci/config.yml" }}
+
+cache_save: &cache_save
+  key: *cache_key
+  paths:
+    - extensions
+    - node_modules
+
+credentials: &credentials
+    name: Credentials
+    command: |
+      set -e
+      echo $CLIENT_SECRET | base64 --decode > $HOME/ci_service_account_key.json
+      gcloud auth activate-service-account --key-file $HOME/ci_service_account_key.json
+
+grow_install: &grow_install
+  name: Grow Install
+  command: grow install
+
+node_version: &node_version
+  name: Node Version
+  command: node -v > node_version.txt
+
+jobs:
+  deploy:
+    working_directory: ~/grow
+    docker:
+      - image: grow/base:latest
+    steps:
+      - checkout
+      - run: *credentials
+      - run: *node_version
+      - restore_cache: *cache_restore
+      - run: *grow_install
+      - save_cache: *cache_save
+      - run:
+          name: Deploy Prod
+          command: make deploy
+
+  stage:
+    working_directory: ~/grow
+    docker:
+      - image: grow/base:latest
+    steps:
+      - checkout
+      - run: *node_version
+      - restore_cache: *cache_restore
+      - run: *grow_install
+      - save_cache: *cache_save
+      - run:
+          name: Deploy Staging
+          command: make stage
+
+workflows:
+  version: 2
+  build:
+    jobs:
+    - stage:
+        filters:
+          branches:
+            ignore:
+              - master
+    - deploy:
+        filters:
+          branches:
+            only:
+              - master
+  scheduled:
+    triggers:
+      - schedule:
+          cron: "0,30 * * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - deploy

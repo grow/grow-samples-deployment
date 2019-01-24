@@ -1,0 +1,59 @@
+# TODO: Fix subdomain prefix for staging.
+timeout: 1200s  # 20m.
+
+substitutions:
+  _PROJECT_NAME: ''  # Optional, when one GCP project hosts multiple builds.
+  _CACHE_KEY: package.json extensions.txt
+  _CACHE_DIRS: node_modules extensions
+  _WEBREVIEW_API_KEY: ''  # If specified, API key authentication is used instead of a service account.
+  _WEBREVIEW_SUBDOMAIN: grow-sample-cloudbuild
+
+options:
+  substitution_option: ALLOW_LOOSE
+
+steps:
+- name: gcr.io/cloud-builders/gsutil
+  id: create cache key
+  entrypoint: bash
+  args:
+  - '-c'
+  - md5sum ${_CACHE_KEY} | md5sum | cut -f 1 -d ' ' > cache-key.txt
+
+- name: gcr.io/cloud-builders/gsutil
+  id: download cache
+  entrypoint: bash
+  args:
+  - '-c'
+  - gsutil -m cp gs://${PROJECT_ID}_cloudbuild/grow-cache-${_PROJECT_NAME}/$(<cache-key.txt)/cache.tgz cache.tgz || echo 'No cache to download.'
+
+- name: gcr.io/cloud-builders/gsutil
+  id: extract cache
+  entrypoint: bash
+  args:
+  - '-c'
+  - tar -xzf cache.tgz || echo 'No cache to extract.'
+
+- name: grow/base
+  id: grow install
+  args: ['grow', 'install']
+
+- name: grow/base
+  id: grow stage
+  args: ['grow', 'stage', '--subdomain=${_WEBREVIEW_SUBDOMAIN}']
+  env:
+  - 'BUDOU_KEY=${_BUDOU_KEY}'
+  - 'WEBREVIEW_API_KEY=${_WEBREVIEW_API_KEY}'
+
+- name: gcr.io/cloud-builders/gsutil
+  id: compress cache
+  entrypoint: bash
+  args:
+  - '-c'
+  - tar -czf cache.tgz ${_CACHE_DIRS}
+
+- name: gcr.io/cloud-builders/gsutil
+  id: upload cache
+  entrypoint: bash
+  args:
+  - '-c'
+  - gsutil cp cache.tgz gs://${PROJECT_ID}_cloudbuild/grow-cache-${_PROJECT_NAME}/$(<cache-key.txt)/cache.tgz

@@ -1,0 +1,8 @@
+deployments:
+  webreview:
+    destination: webreview
+    server: grow-prod.appspot.com
+    project: samples/grow-samples-deployment
+  prod:
+    destination: local
+    out_dir: ./build/

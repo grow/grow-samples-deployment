@@ -58,7 +58,7 @@ steps:
   entrypoint: bash
   args:
   - '-c'
-  - tar -czf cache.tgz ${_CACHE_DIRS}
+  - tar -czf cache.tgz $(ls ${_CACHE_DIRS} 2> /dev/null )  # Ignore missing directories.
 
 - name: gcr.io/cloud-builders/gsutil
   id: upload cache

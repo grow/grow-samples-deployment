@@ -6,7 +6,7 @@ substitutions:
   _CACHE_DIRS: node_modules extensions
   _CACHE_KEY: package.json extensions.txt
   _PROJECT_NAME: ~  # Optional, when one GCP project hosts multiple builds.
-  _WEBREVIEW_API_KEY: ~  # If present, API key authentication is used instead of a service account. (Requires uncomment in `grow stage` build step.)
+  _WEBREVIEW_API_KEY: ~  # If present, API key authentication is used instead of a service account.
 
 options:
   substitution_option: ALLOW_LOOSE
@@ -46,11 +46,12 @@ steps:
 
 - name: grow/base
   id: grow stage
-  args: ['grow', 'stage']
+  entrypoint: bash
+  args:
+  - '-c'
+  - '[ -f auth-key.json ] && grow --auth-key-file=auth-key.json stage || grow stage --api-key={$_WEBREVIEW_API_KEY}'
   env:
   - 'BUDOU_KEY=${_BUDOU_KEY}'
-  # NOTE: Uncomment to use API key for webreview authentication.
-  # - 'WEBREVIEW_API_KEY=${_WEBREVIEW_API_KEY}'
 
 - name: gcr.io/cloud-builders/gsutil
   id: compress cache

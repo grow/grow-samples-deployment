@@ -1,4 +1,3 @@
-# TODO: Fix subdomain prefix for staging.
 timeout: 1200s  # 20m.
 
 substitutions:
@@ -10,6 +9,8 @@ substitutions:
 
 options:
   substitution_option: ALLOW_LOOSE
+  # Optional, use a machine with more CPU power. Using a non-default may increase build start time.
+  # machineType: N1_HIGHCPU_32
 
 steps:
 - name: gcr.io/cloud-builders/gsutil

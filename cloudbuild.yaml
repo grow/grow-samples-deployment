@@ -2,10 +2,11 @@
 timeout: 1200s  # 20m.
 
 substitutions:
-  _PROJECT_NAME: ''  # Optional, when one GCP project hosts multiple builds.
-  _CACHE_KEY: package.json extensions.txt
+  _AUTH_KEY: ~  # base64-encoded Google OAuth client secret. If present, decoded to `auth-key-file.json`.
   _CACHE_DIRS: node_modules extensions
-  _WEBREVIEW_API_KEY: ''  # If specified, API key authentication is used instead of a service account.
+  _CACHE_KEY: package.json extensions.txt
+  _PROJECT_NAME: ~  # Optional, when one GCP project hosts multiple builds.
+  _WEBREVIEW_API_KEY: ~  # If present, API key authentication is used instead of a service account. (Requires uncomment in `grow stage` build step.)
 
 options:
   substitution_option: ALLOW_LOOSE
@@ -32,6 +33,13 @@ steps:
   - '-c'
   - tar -xzf cache.tgz || echo 'No cache to extract.'
 
+- name: gcr.io/cloud-builders/gsutil
+  id: credentials
+  entrypoint: bash
+  args:
+  - '-c'
+  - '[[ -z "${_AUTH_KEY}" ]] && echo "Skipping creation of auth-key.json." || echo ${_AUTH_KEY} | base64 --decode > auth-key.json && echo "Wrote credentials to auth-key.json."'
+
 - name: grow/base
   id: grow install
   args: ['grow', 'install']
@@ -41,7 +49,8 @@ steps:
   args: ['grow', 'stage']
   env:
   - 'BUDOU_KEY=${_BUDOU_KEY}'
-  - 'WEBREVIEW_API_KEY=${_WEBREVIEW_API_KEY}'
+  # NOTE: Uncomment to use API key for webreview authentication.
+  # - 'WEBREVIEW_API_KEY=${_WEBREVIEW_API_KEY}'
 
 - name: gcr.io/cloud-builders/gsutil
   id: compress cache

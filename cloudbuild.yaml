@@ -6,7 +6,6 @@ substitutions:
   _CACHE_KEY: package.json extensions.txt
   _CACHE_DIRS: node_modules extensions
   _WEBREVIEW_API_KEY: ''  # If specified, API key authentication is used instead of a service account.
-  _WEBREVIEW_SUBDOMAIN: grow-sample-cloudbuild
 
 options:
   substitution_option: ALLOW_LOOSE
@@ -39,7 +38,7 @@ steps:
 
 - name: grow/base
   id: grow stage
-  args: ['grow', 'stage', '--subdomain=${_WEBREVIEW_SUBDOMAIN}']
+  args: ['grow', 'stage']
   env:
   - 'BUDOU_KEY=${_BUDOU_KEY}'
   - 'WEBREVIEW_API_KEY=${_WEBREVIEW_API_KEY}'

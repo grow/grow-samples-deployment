@@ -3,6 +3,7 @@ deployments:
     destination: webreview
     server: grow-prod.appspot.com
     project: samples/grow-samples-deployment
+    subdomain_prefix: grow-samples-deployment
   prod:
     destination: local
     out_dir: ./build/

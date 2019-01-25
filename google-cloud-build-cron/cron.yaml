@@ -1,0 +1,7 @@
+# https://cloud.google.com/appengine/docs/standard/python/config/cronref
+
+cron:
+- description: run trigger
+  schedule: every 30 minutes
+  target: cloud-build-cron
+  url: /triggers/run?trigger=b9c53796-0178-4341-97ea-7f7457e0632d

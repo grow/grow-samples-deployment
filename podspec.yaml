@@ -1,3 +1,10 @@
+grow_version: ">=0.2.5"
+
+home: /content/pages/index.yaml
+
+localization:
+  default_locale: en
+
 deployments:
   webreview:
     destination: webreview
@@ -7,3 +14,4 @@ deployments:
   prod:
     destination: local
     out_dir: ./build/
+
